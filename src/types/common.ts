@@ -1,3 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-export type CustomRequestHandler = (req: Request, res: Response) => Promise<void>
+export interface CustomRequest extends Request {
+    user?: any;
+}
+
+export type CustomRequestHandler = (req: CustomRequest, res: Response, next?: NextFunction) => Promise<void | Response>
