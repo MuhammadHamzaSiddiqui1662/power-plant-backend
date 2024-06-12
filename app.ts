@@ -4,10 +4,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { CarRouter } from "./src/features/car/car.controller";
 import { authMiddleware } from "./src/features/auth/auth.middleware";
 import { AuthRouter } from "./src/features/auth/auth.controller";
 import { UserRouter } from "./src/features/user/user.controller";
+import { CardRouter } from "./src/features/card/card.controller";
 
 const app = express();
 
@@ -24,3 +24,4 @@ app.listen(PORT, () => {
 
 app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/users", authMiddleware, UserRouter);
+app.use("/api/cards", CardRouter);
