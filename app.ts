@@ -1,12 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
+
+import { CarRouter } from "./src/features/car/car.controller";
 import { authMiddleware } from "./src/features/auth/auth.middleware";
 import { AuthRouter } from "./src/features/auth/auth.controller";
 import { UserRouter } from "./src/features/user/user.controller";
-
-dotenv.config();
 
 const app = express();
 
