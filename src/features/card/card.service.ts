@@ -19,7 +19,7 @@ export const createCard: CustomRequestHandler = async (req, res) => {
             cardNumber: encrypt(cardNumber),
             expiryDate,
             cvv: encrypt(cvv),
-            userId
+            userId: userId || req.user?.userId
         });
         await newCard.save();
         res.status(201).json(newCard);
