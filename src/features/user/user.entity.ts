@@ -32,19 +32,28 @@ const userSchema = new Schema({
     },
     image: {
         type: String,
+        default: "/placeholder-avatar.png"
     },
     location: {
         type: String,
     },
     earning: {
         type: Number,
+        default: 0
     },
     listing: {
         type: Number,
+        default: 0
     },
     status: {
         type: String,
         required: [true, "Status is a required field"],
+    },
+    otp: {
+        type: String,
+    },
+    otpExpiry: {
+        type: Date,
     },
 }, { timestamps: true });
 
