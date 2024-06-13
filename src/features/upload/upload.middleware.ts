@@ -2,12 +2,7 @@ import multer, { DiskStorageOptions } from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { Request } from 'express';
-
-export const extractRootDirPath = (path: string) => {
-    const pathArray = path.split('\\');
-    const pathOfRootDir = pathArray.slice(0, pathArray.indexOf("src"));
-    return pathOfRootDir.join("\\")
-}
+import { extractRootDirPath } from '../../utils';
 
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {

@@ -2,7 +2,7 @@ import path from "path";
 import fs from 'fs';
 import { CustomRequestHandler } from "../../types/common";
 import { User } from "./user.entity";
-import { extractRootDirPath } from "../upload/upload.middleware";
+import { extractRootDirPath } from "../../utils";
 
 export const getAllUsers: CustomRequestHandler = async (req, res) => {
     try {
