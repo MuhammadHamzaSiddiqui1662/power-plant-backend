@@ -10,6 +10,7 @@ import { UserRouter } from "./src/features/user/user.controller";
 import { CardRouter } from "./src/features/card/card.controller";
 import path from "path";
 import { PackageRouter } from "./src/features/package/package.controller";
+import { NotificationRouter } from "./src/features/notification/notification.controller";
 
 const app = express();
 
@@ -28,4 +29,5 @@ app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/users", authMiddleware, UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/packages", authMiddleware, PackageRouter);
+app.use("/notifications", NotificationRouter);
 app.use('/assets/uploads', express.static(path.join(__dirname, 'assets/uploads')));
