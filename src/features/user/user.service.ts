@@ -1,5 +1,8 @@
+import path from "path";
+import fs from 'fs';
 import { CustomRequestHandler } from "../../types/common";
 import { User } from "./user.entity";
+import { extractRootDirPath } from "../upload/upload.middleware";
 
 export const getAllUsers: CustomRequestHandler = async (req, res) => {
     try {
@@ -41,7 +44,26 @@ export const updateUser: CustomRequestHandler = async (req, res) => {
             return res.status(403).json({ message: "You can only update your own data" });
         }
 
-        const user = await User.findByIdAndUpdate(userIdToUpdate, req.body, { new: true });
+        const updateData: any = { ...req.body };
+
+        // Check if a file is provided
+        if (req.file) {
+            updateData.imageUrl = `/assets/uploads/users/${req.file.filename}`;
+
+            // Find the user to get the current imageUrl
+            const user = await User.findById(userIdToUpdate);
+            if (user && user.imageUrl && user.imageUrl !== '/placeholder-avatar.png') {
+                // Delete the previous image file
+                const imagePath = path.join(extractRootDirPath(__dirname), 'assets', 'uploads', 'users', path.basename(user.imageUrl));
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                } else {
+                    console.log(`File not found: ${imagePath}`);
+                }
+            }
+        }
+
+        const user = await User.findByIdAndUpdate(userIdToUpdate, updateData, { new: true });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -54,16 +76,27 @@ export const updateUser: CustomRequestHandler = async (req, res) => {
 export const deleteUser: CustomRequestHandler = async (req, res) => {
     try {
         const { userId } = req.user; // Extract userId from the token
-        const userIdToUpdate = req.params.id;
+        const userIdToDelete = req.params.id;
 
-        if (userId !== userIdToUpdate) {
+        if (userId !== userIdToDelete) {
             return res.status(403).json({ message: "You can only delete your own data" });
         }
 
-        const user = await User.findByIdAndDelete(req.params.id);
+        const user = await User.findByIdAndDelete(userIdToDelete);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+
+        // Delete the user's image file if it's not the default placeholder
+        if (user.imageUrl && user.imageUrl !== '/placeholder-avatar.png') {
+            const imagePath = path.join(extractRootDirPath(__dirname), 'assets', 'uploads', 'users', path.basename(user.imageUrl));
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            } else {
+                console.log(`File not found: ${imagePath}`);
+            }
+        }
+
         res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
         res.status(500).json(error);
