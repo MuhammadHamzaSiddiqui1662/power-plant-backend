@@ -31,3 +31,4 @@ app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/packages", authMiddleware, PackageRouter);
 app.use("/api/v1/notifications", NotificationRouter);
 app.use('/assets/uploads', express.static(path.join(__dirname, 'assets/uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
