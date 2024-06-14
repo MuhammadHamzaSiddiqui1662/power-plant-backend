@@ -29,5 +29,5 @@ app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/users", authMiddleware, UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/packages", authMiddleware, PackageRouter);
-app.use("/notifications", NotificationRouter);
+app.use("/api/v1/notifications", NotificationRouter);
 app.use('/assets/uploads', express.static(path.join(__dirname, 'assets/uploads')));
