@@ -1,3 +1,5 @@
+import { UserType } from "./user";
+
 export interface LoginRequestBody {
     email: string;
     password: string;
@@ -9,7 +11,7 @@ export interface RegisterRequestBody {
     email: string;
     password: string;
     phone: string;
-    type: string;
+    type: UserType;
     birthDate: Date;
     imageUrl: string;
     location: string;

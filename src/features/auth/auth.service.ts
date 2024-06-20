@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { LoginRequestBody, RefreshTokenBody, RegisterRequestBody, ResendOtpBody, VerifyOtpBody } from "../../types/auth";
+import { UserStatus } from "../../types/user";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
@@ -70,7 +71,7 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (re
             birthDate,
             imageUrl,
             location,
-            status: 'Pending', // Initially, set status to 'Pending'
+            status: UserStatus.Pending,
             otp,
             otpExpiry,
         });
@@ -102,7 +103,7 @@ export const verifyOTP: CustomRequestHandler<VerifyOtpBody> = async (req, res) =
             return res.status(400).json({ message: "OTP expired" });
         }
 
-        user.status = "Active"; // Update status to 'Active'
+        user.status = UserStatus.Active; // Update status to 'Active'
         user.otp = undefined; // Clear the OTP
         user.otpExpiry = undefined; // Clear the OTP expiry
 
