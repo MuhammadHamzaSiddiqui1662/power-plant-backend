@@ -3,6 +3,7 @@ import { User } from "../user/user.entity";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { LoginRequestBody, RefreshTokenBody, RegisterRequestBody, ResendOtpBody, VerifyOtpBody } from "../../types/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
@@ -52,9 +53,9 @@ const generateTokens = (userId: string) => {
     return { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry };
 };
 
-export const registerUser: CustomRequestHandler = async (req, res) => {
+export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (req, res) => {
     try {
-        const { firstName, lastName, email, password, phone, type, birthDate, image, location } = req.body;
+        const { firstName, lastName, email, password, phone, type, birthDate, imageUrl, location } = req.body;
         const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
         const otp = generateOTP();
         const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes
@@ -67,7 +68,7 @@ export const registerUser: CustomRequestHandler = async (req, res) => {
             phone,
             type,
             birthDate,
-            image,
+            imageUrl,
             location,
             status: 'Pending', // Initially, set status to 'Pending'
             otp,
@@ -84,7 +85,7 @@ export const registerUser: CustomRequestHandler = async (req, res) => {
     }
 };
 
-export const verifyOTP: CustomRequestHandler = async (req, res) => {
+export const verifyOTP: CustomRequestHandler<VerifyOtpBody> = async (req, res) => {
     try {
         const { email, otp } = req.body;
         let user = await User.findOne({ email });
@@ -123,7 +124,7 @@ export const verifyOTP: CustomRequestHandler = async (req, res) => {
     }
 };
 
-export const loginUser: CustomRequestHandler = async (req, res) => {
+export const loginUser: CustomRequestHandler<LoginRequestBody> = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -148,14 +149,14 @@ export const loginUser: CustomRequestHandler = async (req, res) => {
     }
 };
 
-export const refreshToken: CustomRequestHandler = async (req, res) => {
+export const refreshToken: CustomRequestHandler<RefreshTokenBody> = async (req, res) => {
     try {
-        const { token } = req.body;
-        if (!token) {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
             return res.status(400).json({ message: "No token provided" });
         }
 
-        jwt.verify(token, REFRESH_TOKEN_SECRET, ((err: any, decoded: any) => {
+        jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, ((err: any, decoded: any) => {
             if (err) {
                 return res.status(401).json({ message: "Invalid token" });
             }
@@ -173,7 +174,7 @@ export const refreshToken: CustomRequestHandler = async (req, res) => {
     }
 };
 
-export const resendOTP: CustomRequestHandler = async (req, res) => {
+export const resendOTP: CustomRequestHandler<ResendOtpBody> = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
