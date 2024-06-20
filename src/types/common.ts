@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 
-export interface CustomRequest extends Request {
+export interface CustomRequest<T = any> extends Request {
     user?: any;
+    body: T;
 }
 
-export type CustomRequestHandler = (req: CustomRequest, res: Response, next?: NextFunction) => Promise<void | Response>
+export type CustomRequestHandler<T = any> = (req: CustomRequest<T>, res: Response, next?: NextFunction) => Promise<void | Response>;
