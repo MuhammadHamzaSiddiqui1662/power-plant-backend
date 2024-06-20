@@ -87,7 +87,7 @@ export const registerUser: CustomRequestHandler = async (req, res) => {
 export const verifyOTP: CustomRequestHandler = async (req, res) => {
     try {
         const { email, otp } = req.body;
-        const user = await User.findOne({ email });
+        let user = await User.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -105,12 +105,14 @@ export const verifyOTP: CustomRequestHandler = async (req, res) => {
         user.otp = undefined; // Clear the OTP
         user.otpExpiry = undefined; // Clear the OTP expiry
 
-        await user.save();
+        user = await user.save();
+        const { password: _password, online, lastSeen, otp: _otp, otpExpiry, ...userDetails } = user.toJSON();
 
         const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } = generateTokens(user._id.toString());
 
         res.status(200).json({
             message: "Email verified successfully",
+            user: userDetails,
             accessToken,
             refreshToken,
             accessTokenExpiry,
@@ -133,7 +135,9 @@ export const loginUser: CustomRequestHandler = async (req, res) => {
             return res.status(401).json({ message: "Invalid password" });
         }
         const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } = generateTokens(user._id.toString());
+        const { password: _password, online, lastSeen, otp, otpExpiry, ...userDetails } = user.toJSON();
         res.status(200).json({
+            user: userDetails,
             accessToken,
             refreshToken,
             accessTokenExpiry,
@@ -191,13 +195,3 @@ export const resendOTP: CustomRequestHandler = async (req, res) => {
         res.status(500).json(error);
     }
 };
-
-/*
-
-accessToken
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY5OTNiYzRmNjQ4OWQ1Mjk4MzMyMzIiLCJpYXQiOjE3MTgxOTUxNjMsImV4cCI6MTcxODE5ODc2M30.bYgNhgwt_dbLfBg3O0URcjsPNNfra3d-9GKEbiktq5A
-
-refreshToken
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY5OTNiYzRmNjQ4OWQ1Mjk4MzMyMzIiLCJpYXQiOjE3MTgxOTUxNjMsImV4cCI6MTcxODc5OTk2M30.n6sM1fzQdWHm7JQ7GgbMW1CO9Pv3eNVydmzFlkjwGNU
-
-*/
