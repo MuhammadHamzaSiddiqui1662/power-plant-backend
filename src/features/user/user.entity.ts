@@ -55,6 +55,14 @@ const userSchema = new Schema({
     otpExpiry: {
         type: Date,
     },
+    online: {
+        type: Boolean,
+        default: false
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now
+    },
 }, { timestamps: true });
 
 export const User = model("User", userSchema);
