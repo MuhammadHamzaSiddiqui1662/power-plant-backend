@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
+import mongoose, { ConnectOptions } from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
@@ -32,7 +32,13 @@ const io = new Server(server, {
 });
 chatSocket(io);
 
-mongoose.connect(process.env.DB_CONNECTION || "");
+mongoose
+  .connect(process.env.MONGO_DB_URI || "", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  } as ConnectOptions)
+  .then((res) => console.log(`MongoDB Connected: ${res.connection.host}`))
+  .catch((err) => console.error(err));
 
 const PORT = process.env.PORT || 3001;
 
@@ -53,4 +59,5 @@ app.use(
   "/assets/uploads",
   express.static(path.join(__dirname, "assets/uploads"))
 );
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
+app.use("/", (_, res) => res.send(`<h1>Server running on port ${PORT}</h1>`));
