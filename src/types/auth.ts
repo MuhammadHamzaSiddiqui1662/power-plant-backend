@@ -1,31 +1,30 @@
 import { UserType } from "./user";
 
 export interface LoginRequestBody {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface RegisterRequestBody {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    phone: string;
-    type: UserType;
-    birthDate: Date;
-    imageUrl: string;
-    location: string;
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  type: UserType;
+  birthDate: Date;
+  imageUrl: string;
+  location: string;
 }
 
 export interface VerifyOtpBody {
-    email: string;
-    otp: string;
+  email: string;
+  otp: string;
 }
 
 export interface RefreshTokenBody {
-    refreshToken: string;
+  refreshToken: string;
 }
 
 export interface ResendOtpBody {
-    email: string;
+  email: string;
 }
