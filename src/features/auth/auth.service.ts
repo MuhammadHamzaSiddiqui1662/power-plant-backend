@@ -83,6 +83,17 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
       imageUrl,
       location,
     } = req.body;
+
+    const user = await User.findOne({ email });
+    if (user?.status === "Active") {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+    if (user?.status === "Pending") {
+      return res
+        .status(404)
+        .json({ message: "Email already in use of a pending status account." });
+    }
+
     const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes
