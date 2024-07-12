@@ -105,11 +105,9 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
 
     sendOtpEmail(email, otp);
 
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully. Check your email for the OTP.",
-      });
+    res.status(201).json({
+      message: "User registered successfully. Check your email for the OTP.",
+    });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -174,6 +172,9 @@ export const loginUser: CustomRequestHandler<LoginRequestBody> = async (
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+    if (user.status !== "Active") {
+      return res.status(400).json({ message: "Email not verified" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
