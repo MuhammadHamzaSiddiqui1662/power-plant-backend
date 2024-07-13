@@ -3,6 +3,7 @@ import fs from "fs";
 import { CustomRequestHandler } from "../../types/common";
 import { User } from "./user.entity";
 import { extractRootDirPath } from "../../utils";
+import { IP } from "../ip/ip.entity";
 
 export const getAllUsers: CustomRequestHandler = async (req, res) => {
   try {
@@ -120,6 +121,16 @@ export const deleteUser: CustomRequestHandler = async (req, res) => {
     }
 
     res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const getIPs: CustomRequestHandler = async (req, res) => {
+  try {
+    const { _id } = req.user;
+    const ips = await IP.find({ userId: _id });
+    res.status(200).json(ips);
   } catch (error) {
     res.status(500).json(error);
   }

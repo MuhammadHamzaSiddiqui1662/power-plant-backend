@@ -1,5 +1,19 @@
 import { Schema, model } from "mongoose";
 
+export const certificateSchema = new Schema(
+  {
+    category: {
+      type: String,
+      required: [true, "Type is a required field"],
+    },
+    imageUrl: {
+      type: String,
+      required: [true, "ImageUrl is a required field"],
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new Schema(
   {
     name: {
@@ -19,10 +33,6 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Phone number is a required field"],
     },
-    type: {
-      type: String,
-      required: [true, "Type is a required field"],
-    },
     birthDate: {
       type: Date,
       required: [true, "Birth date is a required field"],
@@ -33,14 +43,6 @@ const userSchema = new Schema(
     },
     location: {
       type: String,
-    },
-    earning: {
-      type: Number,
-      default: 0,
-    },
-    listing: {
-      type: Number,
-      default: 0,
     },
     status: {
       type: String,
@@ -59,6 +61,43 @@ const userSchema = new Schema(
     lastSeen: {
       type: Date,
       default: Date.now,
+    },
+    ratingAsInvestor: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+    },
+    ratingAsBorker: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+    },
+    ratingAsInnovator: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+    },
+    totalBrokersHired: {
+      type: String,
+    },
+    dealsInProgress: {
+      type: String,
+    },
+    successfulDeals: {
+      type: String,
+    },
+    certificates: {
+      type: [certificateSchema],
+    },
+    interests: {
+      type: [String],
+    },
+    brokerIdentityUrl: {
+      type: String,
+    },
+    notificationsAllowed: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

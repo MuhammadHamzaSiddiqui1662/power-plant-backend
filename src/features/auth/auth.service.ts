@@ -73,16 +73,8 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
   res
 ) => {
   try {
-    const {
-      name,
-      email,
-      password,
-      phone,
-      type,
-      birthDate,
-      imageUrl,
-      location,
-    } = req.body;
+    const { name, email, password, phone, birthDate, location, ...others } =
+      req.body;
 
     const user = await User.findOne({ email });
     if (user?.status === "Active") {
@@ -103,13 +95,12 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
       email,
       password: hashedPassword,
       phone,
-      type,
       birthDate,
-      imageUrl,
       location,
       status: UserStatus.Pending,
       otp,
       otpExpiry,
+      ...others,
     });
 
     await newUser.save();
