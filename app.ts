@@ -33,7 +33,7 @@ const io = new Server(server, {
 chatSocket(io);
 
 mongoose
-  .connect(process.env.MONGO_DB_URI || "", {
+  .connect(process.env.DB_CONNECTION || "", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   } as ConnectOptions)
