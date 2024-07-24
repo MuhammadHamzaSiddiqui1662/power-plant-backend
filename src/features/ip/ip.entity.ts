@@ -19,6 +19,7 @@ const sectionSchema = new Schema<ISection>({
 interface IIP extends Document {
   name: string;
   description: string;
+  abstract: string;
   price: number;
   status: string;
   category: string;
@@ -40,6 +41,10 @@ const ipSchema = new Schema<IIP>({
   description: {
     type: String,
     required: [true, "Description is a required field"],
+  },
+  abstract: {
+    type: String,
+    required: [true, "Abstract is a required field"],
   },
   price: {
     type: Number,
