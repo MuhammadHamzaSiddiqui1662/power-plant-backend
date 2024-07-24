@@ -126,6 +126,23 @@ export const deleteUser: CustomRequestHandler = async (req, res) => {
   }
 };
 
+export const getProfileDetails: CustomRequestHandler = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const userIdToFetch = req.params.id;
+
+    if (userId !== userIdToFetch) {
+      return res
+        .status(403)
+        .json({ message: "You can only view your own profile details" });
+    }
+    const user = await User.find({ _id: userId });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 export const getIPs: CustomRequestHandler = async (req, res) => {
   try {
     const { _id } = req.user;

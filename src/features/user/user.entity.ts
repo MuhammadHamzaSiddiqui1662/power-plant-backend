@@ -33,10 +33,6 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Phone number is a required field"],
     },
-    birthDate: {
-      type: Date,
-      required: [true, "Birth date is a required field"],
-    },
     imageUrl: {
       type: String,
       default: "/placeholder-avatar.png",

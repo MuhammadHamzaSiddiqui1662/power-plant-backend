@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   getIPs,
+  getProfileDetails,
 } from "./user.service";
 import { upload } from "../upload/upload.middleware";
 
@@ -16,6 +17,7 @@ router.post("/", createUser);
 router.get("/:id", getUserById);
 router.put("/:id", upload.single("image"), updateUser);
 router.delete("/:id", deleteUser);
+router.get("/profile", getProfileDetails);
 router.get("/ips", getIPs);
 
 export const UserRouter = router;
