@@ -4,6 +4,7 @@ import { CustomRequestHandler } from "../../types/common";
 import { User } from "./user.entity";
 import { extractRootDirPath } from "../../utils";
 import { IP } from "../ip/ip.entity";
+import { ReviewType } from "../../types/review";
 
 export const getAllUsers: CustomRequestHandler = async (req, res) => {
   try {
@@ -150,5 +151,44 @@ export const getIPs: CustomRequestHandler = async (req, res) => {
     res.status(200).json(ips);
   } catch (error) {
     res.status(500).json(error);
+  }
+};
+
+export const addReview: CustomRequestHandler = async (req, res) => {
+  try {
+    const { userId } = req.user; // Extract userId from the token
+    const { id: userIdToReview, reviewType } = req.params;
+    const reviewData = req.body;
+
+    if (
+      ![
+        ReviewType.ReviewsAsInvestor,
+        ReviewType.ReviewsAsBorker,
+        ReviewType.ReviewsAsInnovator,
+      ].includes(reviewType as ReviewType)
+    ) {
+      return res.status(400).json({ message: "Invalid review type" });
+    }
+
+    // Validate the review data
+    const newReview = {
+      ...reviewData,
+      userId: userId,
+    };
+
+    // Add the review to the appropriate array
+    const user = await User.findById(userIdToReview);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user[reviewType as ReviewType].push(newReview);
+    await user.save();
+
+    return res
+      .status(201)
+      .json({ message: "Review added successfully", review: newReview });
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };

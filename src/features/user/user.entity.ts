@@ -1,17 +1,62 @@
 import { Schema, model } from "mongoose";
 
-export const certificateSchema = new Schema(
+export const certificateSchema = new Schema({
+  category: {
+    type: String,
+    required: [true, "Type is a required field"],
+  },
+  imageUrl: {
+    type: String,
+    required: [true, "ImageUrl is a required field"],
+  },
+});
+
+export const reviewSchema = new Schema(
   {
-    category: {
-      type: String,
-      required: [true, "Type is a required field"],
+    dealSuccessFul: {
+      type: Boolean,
+      default: false,
     },
-    imageUrl: {
+    comments: {
       type: String,
-      required: [true, "ImageUrl is a required field"],
+    },
+    behaviour: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+      required: [true, "Behaviour is a required feild."],
+    },
+    priceNegotiation: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+      required: [true, "Price Negotiation is a required feild."],
+    },
+    responsiveness: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+      required: [true, "Responsiveness is a required feild."],
+    },
+    communication: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+      required: [true, "Communication is a required feild."],
+    },
+    technicalSkills: {
+      type: Number,
+      min: [0, "Minimum value for rating can be 0."],
+      max: [5, "Maximum value for rating can be 5."],
+      required: [true, "Technical Skills is a required feild."],
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is a required field"],
     },
   },
-  { _id: false }
+  { timestamps: true }
 );
 
 const userSchema = new Schema(
@@ -58,20 +103,14 @@ const userSchema = new Schema(
       type: Date,
       default: Date.now,
     },
-    ratingAsInvestor: {
-      type: Number,
-      min: [0, "Minimum value for rating can be 0."],
-      max: [5, "Maximum value for rating can be 5."],
+    reviewsAsInvestor: {
+      type: [reviewSchema],
     },
-    ratingAsBorker: {
-      type: Number,
-      min: [0, "Minimum value for rating can be 0."],
-      max: [5, "Maximum value for rating can be 5."],
+    reviewsAsBorker: {
+      type: [reviewSchema],
     },
-    ratingAsInnovator: {
-      type: Number,
-      min: [0, "Minimum value for rating can be 0."],
-      max: [5, "Maximum value for rating can be 5."],
+    reviewsAsInnovator: {
+      type: [reviewSchema],
     },
     totalBrokersHired: {
       type: String,

@@ -7,6 +7,7 @@ import {
   deleteUser,
   getIPs,
   getProfileDetails,
+  addReview,
 } from "./user.service";
 import { upload } from "../upload/upload.middleware";
 
@@ -19,5 +20,6 @@ router.put("/:id", upload.single("image"), updateUser);
 router.delete("/:id", deleteUser);
 router.get("/profile", getProfileDetails);
 router.get("/ips", getIPs);
+router.post("/:id/:reviewType/reviews", addReview);
 
 export const UserRouter = router;
