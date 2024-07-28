@@ -8,6 +8,8 @@ import {
   getIPs,
   getProfileDetails,
   addReview,
+  addCertificate,
+  deleteCertificate,
 } from "./user.service";
 import { upload } from "../upload/upload.middleware";
 
@@ -21,5 +23,7 @@ router.delete("/:id", deleteUser);
 router.get("/profile", getProfileDetails);
 router.get("/ips", getIPs);
 router.post("/:id/:reviewType/reviews", addReview);
+router.post("/:id/certificates", upload.single("image"), addCertificate);
+router.delete("/:id/certificates/:certificateId", deleteCertificate);
 
 export const UserRouter = router;

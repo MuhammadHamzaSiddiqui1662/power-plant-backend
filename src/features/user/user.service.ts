@@ -192,3 +192,96 @@ export const addReview: CustomRequestHandler = async (req, res) => {
     return res.status(500).json(error);
   }
 };
+
+export const addCertificate: CustomRequestHandler = async (req, res) => {
+  try {
+    const userIdForCertificate = req.params.id;
+    const { userId } = req.user;
+    const { category } = req.body;
+
+    if (userId !== userIdForCertificate) {
+      return res
+        .status(403)
+        .json({ message: "You can only add your own certificates" });
+    }
+
+    if (!category) {
+      return res.status(400).json({ message: "Category is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newCertificate = {
+      category,
+      imageUrl: req.file ? `/assets/uploads/users/${req.file.filename}` : "",
+    };
+
+    user.certificates.push(newCertificate);
+    await user.save();
+
+    res.status(201).json({
+      message: "Certificate added successfully",
+      certificate: newCertificate,
+    });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const deleteCertificate: CustomRequestHandler = async (req, res) => {
+  try {
+    const { id: userIdForCertificate, certificateId } = req.params;
+    const { userId } = req.user;
+
+    if (userId !== userIdForCertificate) {
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own certificates" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const certificateIndex = user.certificates.findIndex(
+      (cert) => cert._id?.toString() === certificateId
+    );
+
+    if (certificateIndex === -1) {
+      return res.status(404).json({ message: "Certificate not found" });
+    }
+
+    const certificate = user.certificates[certificateIndex];
+
+    // Remove certificate from the array
+    user.certificates.splice(certificateIndex, 1);
+    await user.save();
+
+    // Delete the certificate image file if it exists and is not a placeholder
+    if (
+      certificate.imageUrl &&
+      certificate.imageUrl !== "/placeholder-avatar.png"
+    ) {
+      const imagePath = path.join(
+        extractRootDirPath(__dirname),
+        "assets",
+        "uploads",
+        "users",
+        path.basename(certificate.imageUrl)
+      );
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      } else {
+        console.log(`File not found: ${imagePath}`);
+      }
+    }
+
+    res.status(200).json({ message: "Certificate deleted successfully" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
