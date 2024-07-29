@@ -11,6 +11,7 @@ import {
   VerifyOtpBody,
 } from "../../types/auth";
 import { UserStatus } from "../../types/user";
+import { convertToSeconds } from "../../utils";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
@@ -60,10 +61,9 @@ const generateTokens = (userId: string) => {
   });
 
   const accessTokenExpiry =
-    Math.floor(Date.now() / 1000) + parseInt(JWT_EXPIRES_IN.replace(/\D/g, ""));
+    Math.floor(Date.now() / 1000) + convertToSeconds(JWT_EXPIRES_IN);
   const refreshTokenExpiry =
-    Math.floor(Date.now() / 1000) +
-    parseInt(REFRESH_TOKEN_EXPIRES_IN.replace(/\D/g, ""));
+    Math.floor(Date.now() / 1000) + convertToSeconds(REFRESH_TOKEN_EXPIRES_IN);
 
   return { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry };
 };
