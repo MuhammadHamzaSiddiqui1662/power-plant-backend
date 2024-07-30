@@ -17,6 +17,7 @@ import { ChatRouter } from "./src/features/chat/chat.controller";
 import { MessageRouter } from "./src/features/message/message.controller";
 import chatSocket from "./src/features/chat/chat.socket";
 import { CarRouter } from "./src/features/car/car.controller";
+import { IPRouter } from "./src/features/ip/ip.controller";
 
 const app = express();
 
@@ -49,6 +50,7 @@ server.listen(PORT, () => {
 app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/users", authMiddleware, UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
+app.use("/api/v1/ips", authMiddleware, IPRouter);
 app.use("/api/v1/packages", authMiddleware, PackageRouter);
 app.use("/api/v1/notifications", NotificationRouter);
 app.use("/api/v1/chats", authMiddleware, ChatRouter);

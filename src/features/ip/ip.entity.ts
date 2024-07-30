@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose";
+import { IpStatus } from "../../types/ip";
 
 interface ISection {
   title: string;
@@ -21,7 +22,7 @@ interface IIP extends Document {
   description: string;
   abstract: string;
   price: number;
-  status: string;
+  status: IpStatus;
   category: string;
   publishedDate: Date;
   patentNumber: string;

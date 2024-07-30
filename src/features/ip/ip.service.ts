@@ -1,4 +1,5 @@
 import { CustomRequestHandler } from "../../types/common";
+import { IpStatus } from "../../types/ip";
 import { IP } from "./ip.entity";
 
 export const getAllIPs: CustomRequestHandler = async (req, res) => {
@@ -76,6 +77,23 @@ export const deleteIP: CustomRequestHandler = async (req, res) => {
       return res.status(404).json({ message: "IP not found" });
     }
     res.status(200).json({ message: "IP deleted successfully" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const publishIp: CustomRequestHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedIP = await IP.findByIdAndUpdate(
+      id,
+      { status: IpStatus.Published },
+      { new: true }
+    );
+    if (!updatedIP) {
+      return res.status(404).json({ message: "IP not found" });
+    }
+    res.status(200).json(updatedIP);
   } catch (error) {
     res.status(500).json(error);
   }
