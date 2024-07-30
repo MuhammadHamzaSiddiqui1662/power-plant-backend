@@ -103,6 +103,9 @@ const userSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    brokerStatus: {
+      type: String,
+    },
     reviewsAsInvestor: {
       type: [reviewSchema],
     },

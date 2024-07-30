@@ -10,10 +10,9 @@ export interface RegisterRequestBody {
   email: string;
   password: string;
   phone: string;
-  type: UserType;
-  birthDate: Date;
   imageUrl: string;
   location: string;
+  userType: UserType;
 }
 
 export interface VerifyOtpBody {

@@ -10,7 +10,7 @@ import {
   ResendOtpBody,
   VerifyOtpBody,
 } from "../../types/auth";
-import { UserStatus } from "../../types/user";
+import { UserStatus, UserType } from "../../types/user";
 import { convertToSeconds } from "../../utils";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
@@ -73,8 +73,7 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
   res
 ) => {
   try {
-    const { name, email, password, phone, birthDate, location, ...others } =
-      req.body;
+    const { email, password, userType, ...others } = req.body;
 
     const user = await User.findOne({ email });
     if (user?.status === "Active") {
@@ -91,15 +90,12 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes
 
     const newUser = new User({
-      name,
       email,
       password: hashedPassword,
-      phone,
-      birthDate,
-      location,
       status: UserStatus.Pending,
       otp,
       otpExpiry,
+      brokerStatus: userType === UserType.Broker ? UserStatus.Pending : null,
       ...others,
     });
 
