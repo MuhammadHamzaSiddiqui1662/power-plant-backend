@@ -3,7 +3,9 @@ import { IP } from "./ip.entity";
 
 export const getAllIPs: CustomRequestHandler = async (req, res) => {
   try {
-    const ips = await IP.find();
+    const ips = await IP.find().select(
+      "name description price publishedDate patentNumber category"
+    );
     res.status(200).json(ips);
   } catch (error) {
     res.status(500).json(error);
