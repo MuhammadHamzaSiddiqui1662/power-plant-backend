@@ -1,7 +1,7 @@
 import { CustomRequestHandler } from "../../types/common";
 import { User } from "../user/user.entity";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import {
   LoginRequestBody,
@@ -11,6 +11,7 @@ import {
   VerifyOtpBody,
 } from "../../types/auth";
 import { UserStatus, UserType } from "../../types/user";
+import { RefreshToken } from "../refresh-token/refresh-token.entity";
 import { convertToSeconds } from "../../utils";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
@@ -32,7 +33,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 4-digit OTP
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 6-digit OTP
 };
 
 const sendOtpEmail = (email: string, otp: string) => {
@@ -52,7 +53,7 @@ const sendOtpEmail = (email: string, otp: string) => {
   });
 };
 
-const generateTokens = (userId: string) => {
+const generateTokens = async (userId: string, oldRefreshToken?: string) => {
   const accessToken = jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
   });
@@ -64,6 +65,21 @@ const generateTokens = (userId: string) => {
     Math.floor(Date.now() / 1000) + convertToSeconds(JWT_EXPIRES_IN);
   const refreshTokenExpiry =
     Math.floor(Date.now() / 1000) + convertToSeconds(REFRESH_TOKEN_EXPIRES_IN);
+
+  if (oldRefreshToken) {
+    // Update the existing refresh token record
+    await RefreshToken.findOneAndUpdate(
+      { token: oldRefreshToken },
+      { token: refreshToken, expiry: new Date(refreshTokenExpiry * 1000) }
+    );
+  } else {
+    // Create a new refresh token record
+    await new RefreshToken({
+      userId,
+      token: refreshToken,
+      expiry: new Date(refreshTokenExpiry * 1000),
+    }).save();
+  }
 
   return { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry };
 };
@@ -146,7 +162,7 @@ export const verifyOTP: CustomRequestHandler<VerifyOtpBody> = async (
     } = user.toJSON();
 
     const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } =
-      generateTokens(user._id.toString());
+      await generateTokens(user._id.toString());
 
     res.status(200).json({
       message: "Email verified successfully",
@@ -179,7 +195,7 @@ export const loginUser: CustomRequestHandler<LoginRequestBody> = async (
       return res.status(401).json({ message: "Invalid password" });
     }
     const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } =
-      generateTokens(user._id.toString());
+      await generateTokens(user._id.toString());
     const {
       password: _password,
       online,
@@ -210,23 +226,39 @@ export const refreshToken: CustomRequestHandler<RefreshTokenBody> = async (
       return res.status(400).json({ message: "No token provided" });
     }
 
-    jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err: any, decoded: any) => {
+    // Check if the token exists and is not expired
+    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+    if (!storedToken || new Date(storedToken.expiry) < new Date()) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    // Verify the token
+    jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, async (err, decoded) => {
       if (err) {
         return res.status(401).json({ message: "Invalid token" });
       }
 
-      const {
-        accessToken,
-        refreshToken,
-        accessTokenExpiry,
-        refreshTokenExpiry,
-      } = generateTokens(decoded?.userId);
-      res.status(200).json({
-        accessToken,
-        refreshToken,
-        accessTokenExpiry,
-        refreshTokenExpiry,
-      });
+      // Ensure decoded is of type JwtPayload and contains userId
+      if (typeof decoded !== "string" && "userId" in decoded!) {
+        const userId = (decoded as JwtPayload).userId;
+
+        // Generate new tokens
+        const {
+          accessToken,
+          refreshToken: newRefreshToken,
+          accessTokenExpiry,
+          refreshTokenExpiry,
+        } = await generateTokens(userId, refreshToken);
+
+        return res.status(200).json({
+          accessToken,
+          refreshToken: newRefreshToken,
+          accessTokenExpiry,
+          refreshTokenExpiry,
+        });
+      } else {
+        return res.status(401).json({ message: "Invalid token payload" });
+      }
     });
   } catch (error) {
     res.status(500).json(error);
