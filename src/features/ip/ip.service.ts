@@ -43,10 +43,27 @@ export const getIPDetailsById: CustomRequestHandler = async (req, res) => {
 
 export const createIP: CustomRequestHandler = async (req, res) => {
   try {
-    const ipData = req.body;
+    console.log("create");
+    const ipData = JSON.parse(req.body.data || "{}");
+    const { files } = req;
+
+    ipData.images = [];
+    if (Array.isArray(files)) {
+      files.forEach((file) => {
+        const filePath = `/uploads/${
+          req.baseUrl.split("/").pop() || "default"
+        }/${file.filename}`;
+        if (file.fieldname === "backgroundImage") {
+          ipData.mainImg = filePath;
+        } else {
+          ipData.images.push(filePath);
+        }
+      });
+    }
+
     const newIP = new IP({
       ...ipData,
-      userId: req.user._id,
+      userId: "6697be93a02430946870a493",
     });
     const savedIP = await newIP.save();
     res.status(201).json(savedIP);
