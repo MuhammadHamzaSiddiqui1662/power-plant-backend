@@ -61,19 +61,15 @@ const ipSchema = new Schema<IIP>({
   },
   publishedDate: {
     type: Date,
-    required: [true, "Published Date is a required field"],
   },
   patentNumber: {
     type: String,
-    required: [true, "Patent Number is a required field"],
   },
   trademark: {
     type: String,
-    required: [true, "Trademark is a required field"],
   },
   copyright: {
     type: String,
-    required: [true, "Copyright is a required field"],
   },
   mainImg: {
     type: String,
@@ -81,11 +77,9 @@ const ipSchema = new Schema<IIP>({
   },
   images: {
     type: [String],
-    required: [true, "Images are required"],
   },
   sections: {
     type: [sectionSchema],
-    required: [true, "Sections are required"],
   },
   userId: {
     type: Schema.Types.ObjectId,
