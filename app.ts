@@ -18,6 +18,7 @@ import { MessageRouter } from "./src/features/message/message.controller";
 import chatSocket from "./src/features/chat/chat.socket";
 import { CarRouter } from "./src/features/car/car.controller";
 import { IPRouter } from "./src/features/ip/ip.controller";
+import { StripeRouter } from "./src/features/stripe/stripe.controller";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/api/v1/notifications", NotificationRouter);
 app.use("/api/v1/chats", authMiddleware, ChatRouter);
 app.use("/api/v1/messages", authMiddleware, MessageRouter);
 app.use("/api/v1/cars", CarRouter);
+app.use("/api/v1/payment/stripe", StripeRouter);
 
 app.use(
   "/assets/uploads",
