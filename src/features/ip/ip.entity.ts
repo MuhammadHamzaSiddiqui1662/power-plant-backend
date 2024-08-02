@@ -23,7 +23,7 @@ interface IIP extends Document {
   abstract: string;
   price: number;
   status: IpStatus;
-  category: string;
+  categories: string[];
   publishedDate: Date;
   patentNumber: string;
   trademark: string;
@@ -55,8 +55,8 @@ const ipSchema = new Schema<IIP>({
     type: String,
     required: [true, "Status is a required field"],
   },
-  category: {
-    type: String,
+  categories: {
+    type: [String],
     required: [true, "Category is a required feild"],
   },
   publishedDate: {
