@@ -2,13 +2,55 @@ import { CustomRequestHandler } from "../../types/common";
 import { IpStatus } from "../../types/ip";
 import { IP } from "./ip.entity";
 
+const generateMatchQueryForAggregation = (filterQuery: {
+  [key: string]: string | string[];
+}) => {
+  const matchStage: any = {};
+
+  if (filterQuery.categories && filterQuery.categories.length > 0) {
+    matchStage.categories = {};
+    matchStage.categories.$in = Array.isArray(filterQuery.categories)
+      ? filterQuery.categories
+      : [filterQuery.categories];
+  }
+
+  if (filterQuery.min && filterQuery.min !== "") {
+    if (!matchStage.price) matchStage.price = {};
+    matchStage.price.$gte = parseFloat(filterQuery.min as string);
+  }
+
+  if (filterQuery.max && filterQuery.max !== "") {
+    if (!matchStage.price) matchStage.price = {};
+    matchStage.price.$lte = parseFloat(filterQuery.max as string);
+  }
+
+  console.log(matchStage);
+
+  return matchStage;
+};
+
 export const getAllIPs: CustomRequestHandler = async (req, res) => {
   try {
-    const ips = await IP.find().select(
-      "name description price publishedDate patentNumber category"
-    );
+    const ips = await IP.aggregate([
+      {
+        $match: generateMatchQueryForAggregation(req.query as any),
+      },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          publishedDate: 1,
+          patentNumber: 1,
+          categories: 1,
+          mainImg: 1,
+        },
+      },
+    ]);
+
     res.status(200).json(ips);
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
@@ -16,9 +58,8 @@ export const getAllIPs: CustomRequestHandler = async (req, res) => {
 export const getIPById: CustomRequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const ip = await IP.findById(id).select(
-      "name description price publishedDate patentNumber category"
-    );
+    const ip = await IP.findById(id).populate("userId", "reviewsAsInnovator");
+
     if (!ip) {
       return res.status(404).json({ message: "IP not found" });
     }
@@ -31,7 +72,7 @@ export const getIPById: CustomRequestHandler = async (req, res) => {
 export const getIPDetailsById: CustomRequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const ip = await IP.findById(id);
+    const ip = await IP.findById(id).populate("userId", "reviewsAsInnovator");
     if (!ip) {
       return res.status(404).json({ message: "IP not found" });
     }
@@ -50,7 +91,7 @@ export const createIP: CustomRequestHandler = async (req, res) => {
     ipData.images = [];
     if (Array.isArray(files)) {
       files.forEach((file) => {
-        const filePath = `/uploads/${
+        const filePath = `${req.protocol}://${req.get("host")}/assets/uploads/${
           req.baseUrl.split("/").pop() || "default"
         }/${file.filename}`;
         if (file.fieldname === "backgroundImage") {
