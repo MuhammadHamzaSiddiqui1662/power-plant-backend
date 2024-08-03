@@ -26,6 +26,10 @@ const packageSchema = new Schema({
     type: String,
     required: [true, "Redirect Link is required"],
   },
+  type: {
+    type: String,
+    required: [true, "Type is required"],
+  },
 });
 
 export const Package = model("Package", packageSchema);

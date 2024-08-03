@@ -11,6 +11,19 @@ export const getAllPackages: CustomRequestHandler = async (req, res) => {
   }
 };
 
+export const getPackageByType: CustomRequestHandler = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const packageItem = await Package.findOne({ type });
+    if (!packageItem) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+    res.status(200).json(packageItem);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 export const createPackage: CustomRequestHandler = async (req, res) => {
   try {
     const newPackage = new Package(req.body);
