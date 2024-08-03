@@ -80,6 +80,7 @@ const ipSchema = new Schema<IIP>({
   },
   sections: {
     type: [sectionSchema],
+    required: false,
   },
   userId: {
     type: Schema.Types.ObjectId,
