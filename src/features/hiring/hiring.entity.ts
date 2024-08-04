@@ -13,7 +13,7 @@ const hiringSchema = new Schema({
   },
   ip: {
     type: Types.ObjectId,
-    ref: "Ip",
+    ref: "IP",
     required: true,
   },
 });
