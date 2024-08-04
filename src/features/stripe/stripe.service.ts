@@ -14,7 +14,7 @@ export const createStripePaymentIntent: CustomRequestHandler = async (
       return res.status(404).send({ message: "Package not found" });
     }
 
-    const amount = parseFloat(packageData.price) * 100; // convert to cents
+    const amount = parseFloat(packageData.amount) * 100; // convert to cents
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
