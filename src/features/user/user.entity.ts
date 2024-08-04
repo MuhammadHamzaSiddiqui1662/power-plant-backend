@@ -1,5 +1,17 @@
 import { Schema, model } from "mongoose";
 
+export const profilesSchema = new Schema({
+  innovator: {
+    type: Boolean,
+  },
+  investor: {
+    type: Boolean,
+  },
+  broker: {
+    type: Boolean,
+  },
+});
+
 export const certificateSchema = new Schema({
   category: {
     type: String,
@@ -78,16 +90,23 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Phone number is a required field"],
     },
+    about: {
+      type: String,
+    },
     imageUrl: {
       type: String,
       default: "/placeholder-avatar.png",
     },
-    location: {
+    address: {
       type: String,
     },
     status: {
       type: String,
       required: [true, "Status is a required field"],
+    },
+    subscriber: {
+      type: Boolean,
+      default: false,
     },
     otp: {
       type: String,
