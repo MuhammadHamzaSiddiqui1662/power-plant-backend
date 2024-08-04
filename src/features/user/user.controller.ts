@@ -19,11 +19,11 @@ const router = Router();
 
 router.get("/", getAllUsers);
 router.post("/", createUser);
+router.put("/", authMiddleware, upload.single("image"), updateUser);
 router.get("/brokers", getAllBrokers);
 router.get("/profile", authMiddleware, getProfileDetails);
 router.get("/ips", authMiddleware, getIPs);
 router.get("/:id", authMiddleware, getUserById);
-router.put("/:id", authMiddleware, upload.single("image"), updateUser);
 router.delete("/:id", authMiddleware, deleteUser);
 router.post(
   "/:id/certificates",

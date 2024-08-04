@@ -94,7 +94,7 @@ export const getUserById: CustomRequestHandler = async (req, res) => {
 export const updateUser: CustomRequestHandler = async (req, res) => {
   try {
     const { userId } = req.user; // Extract userId from the token
-    const userIdToUpdate = req.params.id;
+    const userIdToUpdate = JSON.parse(req.body.data)._id;
 
     if (userId !== userIdToUpdate) {
       return res
@@ -102,7 +102,8 @@ export const updateUser: CustomRequestHandler = async (req, res) => {
         .json({ message: "You can only update your own data" });
     }
 
-    const updateData: any = { ...req.body };
+    const updateData: any = { ...JSON.parse(req.body.data) };
+    console.log(updateData);
 
     // Check if a file is provided
     if (req.file) {

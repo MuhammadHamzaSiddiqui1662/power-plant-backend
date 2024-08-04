@@ -49,7 +49,7 @@ server.listen(PORT, () => {
 });
 
 app.use("/api/v1/auth", AuthRouter);
-app.use("/api/v1/users", authMiddleware, UserRouter);
+app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/ips", IPRouter);
 app.use("/api/v1/packages", PackageRouter);
