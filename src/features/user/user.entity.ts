@@ -95,7 +95,9 @@ const userSchema = new Schema(
     },
     imageUrl: {
       type: String,
-      default: "/placeholder-avatar.png",
+    },
+    identityUrl: {
+      type: String,
     },
     address: {
       type: String,
