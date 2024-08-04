@@ -84,12 +84,12 @@ const generateTokens = async (userId: string, oldRefreshToken?: string) => {
   return { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry };
 };
 
-export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
-  req,
-  res
-) => {
+export const registerUser: CustomRequestHandler = async (req, res) => {
   try {
-    const { email, password, userType, ...others } = req.body;
+    const { email, password, userType, ...others } = JSON.parse(
+      req.body.data || {}
+    );
+    const { files } = req;
 
     const user = await User.findOne({ email });
     if (user?.status === "Active") {
@@ -99,6 +99,20 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
       return res
         .status(404)
         .json({ message: "Email already in use of a pending status account." });
+    }
+
+    if (Array.isArray(files)) {
+      files.forEach((file) => {
+        const filePath = `${req.protocol}://${req.get("host")}/assets/uploads/${
+          req.baseUrl.split("/").pop() || "default"
+        }/${file.filename}`;
+        if (file.fieldname === "image") {
+          others.imageUrl = filePath;
+        }
+        if (file.fieldname === "pdf") {
+          others.identityUrl = filePath;
+        }
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
@@ -123,6 +137,7 @@ export const registerUser: CustomRequestHandler<RegisterRequestBody> = async (
       message: "User registered successfully. Check your email for the OTP.",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
