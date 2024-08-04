@@ -5,10 +5,64 @@ import { User } from "./user.entity";
 import { extractRootDirPath } from "../../utils";
 import { IP } from "../ip/ip.entity";
 import { ReviewType } from "../../types/review";
+import { UserStatus } from "../../types/user";
+
+const generateMatchQueryForAggregation = (filterQuery: {
+  [key: string]: string | string[];
+}) => {
+  const matchStage: any = {};
+
+  if (filterQuery.categories && filterQuery.categories.length > 0) {
+    matchStage.categories = {};
+    matchStage.categories.$in = Array.isArray(filterQuery.categories)
+      ? filterQuery.categories
+      : [filterQuery.categories];
+  }
+
+  if (filterQuery.min && filterQuery.min !== "") {
+    if (!matchStage.price) matchStage.price = {};
+    matchStage.price.$gte = parseFloat(filterQuery.min as string);
+  }
+
+  if (filterQuery.max && filterQuery.max !== "") {
+    if (!matchStage.price) matchStage.price = {};
+    matchStage.price.$lte = parseFloat(filterQuery.max as string);
+  }
+
+  console.log(matchStage);
+
+  return matchStage;
+};
 
 export const getAllUsers: CustomRequestHandler = async (req, res) => {
   try {
     const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const getAllBrokers: CustomRequestHandler = async (req, res) => {
+  try {
+    const users = await User.aggregate([
+      {
+        $match: {
+          ...generateMatchQueryForAggregation(req.query as any),
+          brokerStatus: UserStatus.Active,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          successfulDeals: 1,
+          dealsInProgress: 1,
+          patentNumber: 1,
+          interests: 1,
+          imageUrl: 1,
+        },
+      },
+    ]);
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json(error);
