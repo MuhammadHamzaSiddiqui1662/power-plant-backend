@@ -115,9 +115,10 @@ export const createIP: CustomRequestHandler = async (req, res) => {
 
 export const updateIP: CustomRequestHandler = async (req, res) => {
   try {
-    const { id } = req.params;
-    const ipData = req.body;
-    const updatedIP = await IP.findByIdAndUpdate(id, ipData, { new: true });
+    const ipData = JSON.parse(req.body.data);
+    const updatedIP = await IP.findByIdAndUpdate(ipData._id, ipData, {
+      new: true,
+    });
     if (!updatedIP) {
       return res.status(404).json({ message: "IP not found" });
     }

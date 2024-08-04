@@ -18,7 +18,7 @@ router.get("/:id", getIPById);
 router.get("/:id/details", authMiddleware, getIPDetailsById);
 router.put("/:id/publish", authMiddleware, publishIp);
 router.post("/", authMiddleware, upload.any(), createIP);
-router.put("/:id", authMiddleware, updateIP);
+router.put("/", authMiddleware, upload.any(), updateIP);
 router.delete("/:id", authMiddleware, deleteIP);
 
 export const IPRouter = router;
