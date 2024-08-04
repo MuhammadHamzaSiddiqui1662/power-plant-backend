@@ -3,7 +3,7 @@ import { Hiring } from "./hiring.entity";
 
 export const getAllHirings: CustomRequestHandler = async (req, res) => {
   try {
-    const hirings = await Hiring.find().populate("innvestor broker ip");
+    const hirings = await Hiring.find().populate("investor broker ip");
     res.status(200).json(hirings);
   } catch (error) {
     res.status(500).json(error);
@@ -13,8 +13,8 @@ export const getAllHirings: CustomRequestHandler = async (req, res) => {
 export const getMyBrokers: CustomRequestHandler = async (req, res) => {
   try {
     const { userId } = req.user; // Extract userId from the token
-    const hirings = await Hiring.find({ innvestor: userId }).populate(
-      "innvestor broker ip"
+    const hirings = await Hiring.find({ investor: userId }).populate(
+      "investor broker ip"
     );
     res.status(200).json(hirings);
   } catch (error) {
@@ -22,11 +22,11 @@ export const getMyBrokers: CustomRequestHandler = async (req, res) => {
   }
 };
 
-export const getMyInnvestors: CustomRequestHandler = async (req, res) => {
+export const getMyInvestors: CustomRequestHandler = async (req, res) => {
   try {
     const { userId } = req.user; // Extract userId from the token
     const hirings = await Hiring.find({ broker: userId }).populate(
-      "innvestor broker ip"
+      "investor broker ip"
     );
     res.status(200).json(hirings);
   } catch (error) {
@@ -36,9 +36,9 @@ export const getMyInnvestors: CustomRequestHandler = async (req, res) => {
 
 export const createHiring: CustomRequestHandler = async (req, res) => {
   try {
-    const { innvestor, broker, ip } = req.body;
+    const { investor, broker, ip } = req.body;
     const newHiring = new Hiring({
-      innvestor,
+      investor,
       broker,
       ip,
     });

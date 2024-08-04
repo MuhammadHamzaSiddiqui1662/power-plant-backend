@@ -1,7 +1,7 @@
 import { Schema, Types, model } from "mongoose";
 
 const hiringSchema = new Schema({
-  innvestor: {
+  investor: {
     type: Types.ObjectId,
     ref: "User",
     required: true,
