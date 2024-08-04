@@ -7,6 +7,7 @@ import {
   deleteIP,
   getIPDetailsById,
   publishIp,
+  getMyIps,
 } from "./ip.service";
 import { authMiddleware } from "../auth/auth.middleware";
 import { upload } from "../upload/upload.middleware";
@@ -14,6 +15,7 @@ import { upload } from "../upload/upload.middleware";
 const router = Router();
 
 router.get("/", getAllIPs);
+router.get("/my-ips", authMiddleware, getMyIps);
 router.get("/:id", getIPById);
 router.get("/:id/details", authMiddleware, getIPDetailsById);
 router.put("/:id/publish", authMiddleware, publishIp);

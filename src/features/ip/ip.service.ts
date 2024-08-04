@@ -69,6 +69,24 @@ export const getIPById: CustomRequestHandler = async (req, res) => {
   }
 };
 
+export const getMyIps: CustomRequestHandler = async (req, res) => {
+  try {
+    const { userId } = req.user; // Extract userId from the token
+    // const { id } = req.params;
+    const ips = await IP.find({ userId }).select(
+      "name description price publishedDate patentNumber categories mainImg status"
+    );
+
+    if (!ips) {
+      return res.status(404).json({ message: "IP not found" });
+    }
+    res.status(200).json(ips);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
 export const getIPDetailsById: CustomRequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
