@@ -111,9 +111,8 @@ export const getIPDetailsById: CustomRequestHandler = async (req, res) => {
 
 export const createIP: CustomRequestHandler = async (req, res) => {
   try {
-    console.log("create");
     const ipData = JSON.parse(req.body.data || "{}");
-    const { files } = req;
+    const { files, user } = req;
 
     ipData.images = [];
     if (Array.isArray(files)) {
@@ -131,7 +130,7 @@ export const createIP: CustomRequestHandler = async (req, res) => {
 
     const newIP = new IP({
       ...ipData,
-      userId: "6697be93a02430946870a493",
+      userId: user.userId,
     });
     const savedIP = await newIP.save();
     res.status(201).json(savedIP);
