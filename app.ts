@@ -8,6 +8,7 @@ dotenv.config();
 
 import { authMiddleware } from "./src/features/auth/auth.middleware";
 import { AuthRouter } from "./src/features/auth/auth.controller";
+import { AdminRouter } from "./src/features/admin/admin.controller";
 import { UserRouter } from "./src/features/user/user.controller";
 import { CardRouter } from "./src/features/card/card.controller";
 import path from "path";
@@ -50,6 +51,7 @@ server.listen(PORT, () => {
 });
 
 app.use("/api/v1/auth", AuthRouter);
+app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/ips", IPRouter);
