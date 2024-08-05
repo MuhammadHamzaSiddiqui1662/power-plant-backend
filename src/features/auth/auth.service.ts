@@ -231,6 +231,90 @@ export const loginUser: CustomRequestHandler<LoginRequestBody> = async (
   }
 };
 
+export const forgotPassword: CustomRequestHandler = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.status !== "Active") {
+      return res.status(400).json({ message: "Email not verified" });
+    }
+
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes
+
+    await User.findByIdAndUpdate(user._id, {
+      otp,
+      otpExpiry,
+    });
+
+    sendOtpEmail(email, otp);
+
+    res.status(201).json({
+      message: "Check your email for the OTP.",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+export const resetPassword: CustomRequestHandler = async (req, res) => {
+  try {
+    const { email, password, otp } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.status !== "Active") {
+      return res.status(400).json({ message: "Email not verified" });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (new Date() > user.otpExpiry!) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+
+    user.otp = undefined; // Clear the OTP
+    user.otpExpiry = undefined; // Clear the OTP expiry
+    user.password = hashedPassword;
+
+    const newUser = await user.save();
+    const {
+      password: _password,
+      online,
+      lastSeen,
+      otp: _otp,
+      otpExpiry,
+      ...userDetails
+    } = newUser.toJSON();
+
+    const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } =
+      await generateTokens(newUser._id.toString());
+
+    res.status(200).json({
+      message: "Password changed successfully",
+      user: userDetails,
+      accessToken,
+      refreshToken,
+      accessTokenExpiry,
+      refreshTokenExpiry,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
 export const refreshToken: CustomRequestHandler<RefreshTokenBody> = async (
   req,
   res
