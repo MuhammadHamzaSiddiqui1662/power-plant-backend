@@ -12,17 +12,26 @@ const generateMatchQueryForAggregation = (filterQuery: {
     matchStage.categories.$in = Array.isArray(filterQuery.categories)
       ? filterQuery.categories
       : [filterQuery.categories];
+
+    delete filterQuery.categories;
   }
 
   if (filterQuery.min && filterQuery.min !== "") {
     if (!matchStage.price) matchStage.price = {};
     matchStage.price.$gte = parseFloat(filterQuery.min as string);
+    delete filterQuery.min;
   }
 
   if (filterQuery.max && filterQuery.max !== "") {
     if (!matchStage.price) matchStage.price = {};
     matchStage.price.$lte = parseFloat(filterQuery.max as string);
+    delete filterQuery.max;
   }
+
+  // for(const {key, value} of filterQuery) {}
+  Object.keys(filterQuery).forEach((key) => {
+    matchStage[key] = filterQuery[key];
+  });
 
   console.log(matchStage);
 
