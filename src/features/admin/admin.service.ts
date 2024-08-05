@@ -85,3 +85,15 @@ export const getAllUsers: CustomRequestHandler = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+export const updateUser: CustomRequestHandler = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findByIdAndUpdate(userId, req.body);
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
