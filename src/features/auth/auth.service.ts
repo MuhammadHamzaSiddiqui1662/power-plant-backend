@@ -6,13 +6,13 @@ import nodemailer from "nodemailer";
 import {
   LoginRequestBody,
   RefreshTokenBody,
-  RegisterRequestBody,
   ResendOtpBody,
   VerifyOtpBody,
 } from "../../types/auth";
 import { UserStatus, UserType } from "../../types/user";
 import { RefreshToken } from "../refresh-token/refresh-token.entity";
 import { convertToSeconds } from "../../utils";
+import { Admin } from "../admin/admin.entity";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
@@ -385,6 +385,55 @@ export const resendOTP: CustomRequestHandler<ResendOtpBody> = async (
     sendOtpEmail(email, otp);
 
     res.status(200).json({ message: "OTP resent successfully" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const registerAdmin: CustomRequestHandler = async (req, res) => {
+  try {
+    const { password, ...others } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+
+    const admin = new Admin({
+      password: hashedPassword,
+      ...others,
+    });
+
+    await admin.save();
+
+    res.status(201).json(admin);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+export const loginAdmin: CustomRequestHandler<LoginRequestBody> = async (
+  req,
+  res
+) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+    const { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } =
+      await generateTokens(admin._id.toString());
+    const { password: _password, ...adminDetails } = admin.toJSON();
+    res.status(200).json({
+      admin: adminDetails,
+      accessToken,
+      refreshToken,
+      accessTokenExpiry,
+      refreshTokenExpiry,
+    });
   } catch (error) {
     res.status(500).json(error);
   }
