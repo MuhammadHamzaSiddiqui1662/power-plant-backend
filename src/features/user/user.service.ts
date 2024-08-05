@@ -13,8 +13,8 @@ const generateMatchQueryForAggregation = (filterQuery: {
   const matchStage: any = {};
 
   if (filterQuery.categories && filterQuery.categories.length > 0) {
-    matchStage.categories = {};
-    matchStage.categories.$in = Array.isArray(filterQuery.categories)
+    matchStage.interests = {};
+    matchStage.interests.$in = Array.isArray(filterQuery.categories)
       ? filterQuery.categories
       : [filterQuery.categories];
   }
@@ -60,6 +60,7 @@ export const getAllBrokers: CustomRequestHandler = async (req, res) => {
           patentNumber: 1,
           interests: 1,
           imageUrl: 1,
+          reviewsAsBorker: 1,
         },
       },
     ]);
