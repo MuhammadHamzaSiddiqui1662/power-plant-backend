@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Message } from "../message/message.entity";
 import { User } from "../user/user.entity";
 import { MessageType } from "../../types/message";
+import { Chat } from "./chat.entity";
 
 const chatSocket = (io: Server) => {
   io.on("connection", (socket) => {
@@ -44,7 +45,24 @@ const chatSocket = (io: Server) => {
         .populate("sender")
         .exec();
 
+      const chat = await Chat.findById(chatId);
+      if (chat) {
+        chat.unReadMessages++;
+        chat.lastMessage = message._id!;
+      }
+
       io.to(chatId).emit("newMessage", populatedMessage);
+    });
+
+    // Handle deal close
+    socket.on("closeDeal", async ({ chatId }) => {
+      const chat = await Chat.findById(chatId);
+      if (chat) {
+        chat.closed = true;
+        await chat.save();
+
+        io.to(chatId).emit("dealClosed", true);
+      }
     });
 
     // Handle message seen

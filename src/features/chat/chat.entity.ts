@@ -17,6 +17,18 @@ const chatSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  open: {
+    type: Boolean,
+    default: false,
+  },
+  unReadMessages: {
+    type: Number,
+    default: 0,
+  },
+  lastMessage: {
+    type: Types.ObjectId,
+    ref: "Message",
+  },
 });
 
 export const Chat = model("Chat", chatSchema);
