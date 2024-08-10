@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { CustomRequestHandler } from "../../types/common";
 import { IP } from "../ip/ip.entity";
 import { User } from "../user/user.entity";
@@ -22,6 +23,26 @@ const generateMatchQueryForIpAggregation = (filterQuery: {
   if (filterQuery.max && filterQuery.max !== "") {
     if (!matchStage.price) matchStage.price = {};
     matchStage.price.$lte = parseFloat(filterQuery.max as string);
+  }
+
+  if (filterQuery.userId && filterQuery.userId !== "") {
+    matchStage.userId = new ObjectId(filterQuery.userId as string);
+  }
+
+  for (const [key, value] of Object.entries(filterQuery)) {
+    if (
+      typeof value === "string" &&
+      key != "categories" &&
+      key != "min" &&
+      key != "max" &&
+      key != "userId"
+    ) {
+      if (value.startsWith("not_")) {
+        matchStage[key] = { $ne: value.substring(4) };
+      } else {
+        matchStage[key] = value;
+      }
+    }
   }
 
   console.log(matchStage);
