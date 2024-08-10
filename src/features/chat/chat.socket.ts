@@ -6,52 +6,69 @@ import { Chat } from "./chat.entity";
 
 const chatSocket = (io: Server) => {
   io.on("connection", (socket) => {
-    console.log("A user connected");
+    console.log(socket.id);
 
     // Update user online status
     socket.on("userOnline", async (userId) => {
-      await User.findByIdAndUpdate(userId, {
-        online: true,
-        lastSeen: new Date(),
-      });
-      socket.broadcast.emit("userStatusChanged", { userId, online: true });
+      if (userId) {
+        await User.findByIdAndUpdate(userId, {
+          online: true,
+          lastSeen: new Date(),
+        });
+        socket.broadcast.emit("userStatusChanged", { userId, online: true });
+      }
     });
 
     // Join a chat room
     socket.on("joinChat", async ({ chatId }) => {
-      socket.join(chatId);
+      if (chatId) {
+        socket.join(chatId);
 
-      // Emit all previous messages in the chat
-      const messages = await Message.find({ chatId })
-        .sort({ timestamp: 1 })
-        .populate("sender");
-      socket.emit("previousMessages", messages);
+        // Emit all previous messages in the chat
+        const messages = await Message.find({ chatId })
+          .sort({ timestamp: 1 })
+          .populate("sender");
+        socket.emit("previousMessages", messages);
+      }
     });
 
     // Handle incoming messages
     socket.on("sendMessage", async ({ chatId, senderId, type, content }) => {
-      if (type === MessageType.CloseChat) {
-        const prevCloseMessage = await Message.findOne({ chatId, type });
-        if (prevCloseMessage)
-          await Message.findByIdAndDelete(prevCloseMessage._id);
-      }
-      const message = new Message(
-        type === MessageType.StartChat || type === MessageType.CloseChat
-          ? { chatId, sender: senderId, type }
-          : { chatId, sender: senderId, type, content }
-      );
-      await message.save();
-      const populatedMessage = await Message.findById(message._id)
-        .populate("sender")
-        .exec();
+      if (chatId && senderId && type) {
+        if (type === MessageType.CloseChat) {
+          const prevCloseMessage = await Message.findOne({ chatId, type });
+          if (prevCloseMessage)
+            await Message.findByIdAndDelete(prevCloseMessage._id);
+        }
+        const message = new Message(
+          type === MessageType.StartChat || type === MessageType.CloseChat
+            ? { chatId, sender: senderId, type }
+            : { chatId, sender: senderId, type, content }
+        );
+        await message.save();
+        const populatedMessage = await Message.findById(message._id)
+          .populate("sender")
+          .exec();
 
+        const chat = await Chat.findById(chatId);
+        if (chat) {
+          chat.unReadMessages++;
+          chat.lastMessage = message._id!;
+        }
+
+        io.to(chatId).emit("newMessage", populatedMessage);
+      }
+    });
+
+    // Handle deal close
+    socket.on("closeDeal", async ({ chatId }) => {
       const chat = await Chat.findById(chatId);
       if (chat) {
-        chat.unReadMessages++;
-        chat.lastMessage = message._id!;
-      }
+        chat.closed = true;
+        await chat.save();
 
-      io.to(chatId).emit("newMessage", populatedMessage);
+        io.to(chatId).emit("dealClosed", true);
+      }
     });
 
     // Handle deal close
@@ -67,16 +84,18 @@ const chatSocket = (io: Server) => {
 
     // Handle message seen
     socket.on("messageSeen", async ({ messageId, userId }) => {
-      const message = await Message.findByIdAndUpdate(messageId, {
-        seen: true,
-        seenAt: new Date(),
-      });
-      if (message) {
-        io.to(message.chatId.toString()).emit("messageSeen", {
-          messageId,
-          userId,
-          seenAt: message.seenAt,
+      if (userId && messageId) {
+        const message = await Message.findByIdAndUpdate(messageId, {
+          seen: true,
+          seenAt: new Date(),
         });
+        if (message) {
+          io.to(message.chatId.toString()).emit("messageSeen", {
+            messageId,
+            userId,
+            seenAt: message.seenAt,
+          });
+        }
       }
     });
 
