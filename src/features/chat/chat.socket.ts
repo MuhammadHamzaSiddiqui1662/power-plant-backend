@@ -5,19 +5,22 @@ import { MessageType } from "../../types/message";
 
 const chatSocket = (io: Server) => {
   io.on("connection", (socket) => {
-    console.log("A user connected");
+    console.log(socket.id);
 
     // Update user online status
     socket.on("userOnline", async (userId) => {
+      if(userId){
       await User.findByIdAndUpdate(userId, {
         online: true,
         lastSeen: new Date(),
       });
       socket.broadcast.emit("userStatusChanged", { userId, online: true });
+    }
     });
 
     // Join a chat room
     socket.on("joinChat", async ({ chatId }) => {
+      if(chatId){
       socket.join(chatId);
 
       // Emit all previous messages in the chat
@@ -25,10 +28,12 @@ const chatSocket = (io: Server) => {
         .sort({ timestamp: 1 })
         .populate("sender");
       socket.emit("previousMessages", messages);
-    });
+    }
+  });
 
     // Handle incoming messages
     socket.on("sendMessage", async ({ chatId, senderId, type, content }) => {
+      if(chatId && senderId && type){
       if (type === MessageType.CloseChat) {
         const prevCloseMessage = await Message.findOne({ chatId, type });
         if (prevCloseMessage)
@@ -43,12 +48,14 @@ const chatSocket = (io: Server) => {
       const populatedMessage = await Message.findById(message._id)
         .populate("sender")
         .exec();
-
       io.to(chatId).emit("newMessage", populatedMessage);
+     
+      }
     });
 
     // Handle message seen
     socket.on("messageSeen", async ({ messageId, userId }) => {
+      if(userId && messageId){
       const message = await Message.findByIdAndUpdate(messageId, {
         seen: true,
         seenAt: new Date(),
@@ -60,6 +67,7 @@ const chatSocket = (io: Server) => {
           seenAt: message.seenAt,
         });
       }
+    }
     });
 
     socket.on("disconnect", async () => {
