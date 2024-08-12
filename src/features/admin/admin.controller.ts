@@ -6,16 +6,17 @@ import {
   getUserHirings,
   updateUser,
 } from "./admin.service";
+import { authMiddleware } from "../auth/auth.middleware";
 
 const router = Router();
 
 router.post("/login", loginAdmin);
 router.post("/register", registerAdmin);
 
-router.get("/ips", getAllIPs);
-router.get("/hirings/:id", getUserHirings);
+router.get("/ips", authMiddleware, getAllIPs);
+router.get("/hirings/:id", authMiddleware, getUserHirings);
 
-router.get("/users", getAllUsers);
-router.put("/users/:id", updateUser);
+router.get("/users", authMiddleware, getAllUsers);
+router.put("/users/:id", authMiddleware, updateUser);
 
 export const AdminRouter = router;
