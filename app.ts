@@ -50,7 +50,7 @@ server.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
 
-app.use("/api/v1/auth", AuthRouter);
+app.use("/api/v1/auth", authMiddleware, AuthRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
