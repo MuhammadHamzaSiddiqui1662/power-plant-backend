@@ -6,15 +6,15 @@ export const createStripePaymentIntent: CustomRequestHandler = async (
   req,
   res
 ) => {
-  const { packageId, currency } = req.body;
+  const { packageType, currency } = req.params;
 
   try {
-    const packageData = await Package.findById(packageId);
-    if (!packageData) {
+    const packageDetails = await Package.findOne({ type: packageType });
+    if (!packageDetails) {
       return res.status(404).send({ message: "Package not found" });
     }
 
-    const amount = parseFloat(packageData.amount) * 100; // convert to cents
+    const amount = parseFloat(packageDetails.amount) * 100; // convert to cents
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
@@ -23,6 +23,7 @@ export const createStripePaymentIntent: CustomRequestHandler = async (
 
     res.send({
       clientSecret: paymentIntent.client_secret,
+      packageDetails,
     });
   } catch (error: any) {
     console.log(error);

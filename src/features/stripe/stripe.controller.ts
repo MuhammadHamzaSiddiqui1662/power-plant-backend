@@ -3,6 +3,6 @@ import { createStripePaymentIntent } from "./stripe.service";
 
 const router = Router();
 
-router.post("/", createStripePaymentIntent);
+router.get("/:packageType/:currency", createStripePaymentIntent);
 
 export const StripeRouter = router;

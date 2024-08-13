@@ -62,7 +62,7 @@ app.use("/api/v1/chats", authMiddleware, ChatRouter);
 app.use("/api/v1/messages", authMiddleware, MessageRouter);
 app.use("/api/v1/hirings", authMiddleware, HiringRouter);
 app.use("/api/v1/cars", CarRouter);
-app.use("/api/v1/payment/stripe", StripeRouter);
+app.use("/api/v1/payment/stripe", authMiddleware, StripeRouter);
 app.use("/api/v1/test", TestRouter);
 
 app.use(
