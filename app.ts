@@ -57,7 +57,7 @@ app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/cards", authMiddleware, CardRouter);
 app.use("/api/v1/ips", IPRouter);
 app.use("/api/v1/packages", PackageRouter);
-app.use("/api/v1/notifications", NotificationRouter);
+app.use("/api/v1/notifications", authMiddleware, NotificationRouter);
 app.use("/api/v1/chats", authMiddleware, ChatRouter);
 app.use("/api/v1/messages", authMiddleware, MessageRouter);
 app.use("/api/v1/hirings", authMiddleware, HiringRouter);
