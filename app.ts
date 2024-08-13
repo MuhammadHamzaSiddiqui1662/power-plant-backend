@@ -21,6 +21,7 @@ import { HiringRouter } from "./src/features/hiring/hiring.controller";
 import { CarRouter } from "./src/features/car/car.controller";
 import { IPRouter } from "./src/features/ip/ip.controller";
 import { StripeRouter } from "./src/features/stripe/stripe.controller";
+import { TestRouter } from "./src/features/test/test";
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use("/api/v1/messages", authMiddleware, MessageRouter);
 app.use("/api/v1/hirings", authMiddleware, HiringRouter);
 app.use("/api/v1/cars", CarRouter);
 app.use("/api/v1/payment/stripe", StripeRouter);
+app.use("/api/v1/test", TestRouter);
 
 app.use(
   "/assets/uploads",
