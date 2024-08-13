@@ -32,8 +32,15 @@ const chatSocket = (io: Server) => {
       }
     });
 
+    // Join room for unseen count and last message live updates
+    socket.on("joinNotificationRoom", async ({ userId }) => {
+      if (userId) {
+        socket.join(userId);
+      }
+    });
+
     // Handle incoming messages
-    socket.on("sendMessage", async ({ chatId, senderId, type, content }) => {
+    socket.on("sendMessage", async ({ chatId, senderId, type, content, receiverId }) => {
       if (chatId && senderId && type) {
         if (type === MessageType.CloseChat) {
           const prevCloseMessage = await Message.findOne({ chatId, type });
@@ -49,14 +56,13 @@ const chatSocket = (io: Server) => {
         const populatedMessage = await Message.findById(message._id)
           .populate("sender")
           .exec();
-
         const chat = await Chat.findById(chatId);
         if (chat) {
           chat.unReadMessages++;
-          chat.lastMessage = message._id!;
+          chat.lastMessage = content;
         }
-
         io.to(chatId).emit("newMessage", populatedMessage);
+        io.to(receiverId).emit("messageNotification", chat);
       }
     });
 

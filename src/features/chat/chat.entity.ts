@@ -26,8 +26,8 @@ const chatSchema = new Schema({
     default: 0,
   },
   lastMessage: {
-    type: Types.ObjectId,
-    ref: "Message",
+    type: String,
+    default: "",
   },
 });
 
