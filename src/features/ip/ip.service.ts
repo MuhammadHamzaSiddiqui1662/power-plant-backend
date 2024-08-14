@@ -1,6 +1,7 @@
 import { CustomRequestHandler } from "../../types/common";
 import { IpStatus } from "../../types/ip";
 import { IP } from "./ip.entity";
+import { ObjectId } from "mongodb";
 
 const generateMatchQueryForAggregation = (filterQuery: {
   [key: string]: string | string[];
@@ -44,13 +45,22 @@ const generateMatchQueryForAggregation = (filterQuery: {
 };
 
 export const getAllIPs: CustomRequestHandler = async (req, res) => {
+  const userId = req.user?.userId;
   try {
     const ips = await IP.aggregate([
       {
-        $match: {
-          ...generateMatchQueryForAggregation(req.query as any),
-          status: IpStatus.Published,
-        },
+        $match: userId
+          ? {
+              ...generateMatchQueryForAggregation(req.query as any),
+              status: IpStatus.Published,
+              userId: {
+                $ne: new ObjectId(userId),
+              },
+            }
+          : {
+              ...generateMatchQueryForAggregation(req.query as any),
+              status: IpStatus.Published,
+            },
       },
       {
         $project: {
