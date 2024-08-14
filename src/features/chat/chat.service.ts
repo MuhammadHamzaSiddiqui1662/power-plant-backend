@@ -1,9 +1,14 @@
 import { CustomRequestHandler } from "../../types/common";
+import { UserType } from "../../types/user";
 import { Chat } from "./chat.entity";
 
 export const getAllChats: CustomRequestHandler = async (req, res) => {
   try {
-    const chats = await Chat.find().populate("innovator investor broker");
+    const userType: number = Number(req.query?.userType);
+    const { userId } = req.user;
+    const chats = await Chat.find({
+      [UserType[userType].toLowerCase()]: userId,
+    }).populate("innovator investor broker");
     res.status(200).json(chats);
   } catch (error) {
     res.status(500).json(error);
