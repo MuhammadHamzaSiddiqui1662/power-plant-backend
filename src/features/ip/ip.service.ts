@@ -28,10 +28,15 @@ const generateMatchQueryForAggregation = (filterQuery: {
     delete filterQuery.max;
   }
 
-  // for(const {key, value} of filterQuery) {}
-  Object.keys(filterQuery).forEach((key) => {
-    matchStage[key] = filterQuery[key];
-  });
+  for (const [key, value] of Object.entries(filterQuery)) {
+    if (typeof value === "string") {
+      if (value.startsWith("not_")) {
+        matchStage[key] = { $ne: value.substring(4) };
+      } else {
+        matchStage[key] = value;
+      }
+    }
+  }
 
   console.log(matchStage);
 
@@ -42,7 +47,10 @@ export const getAllIPs: CustomRequestHandler = async (req, res) => {
   try {
     const ips = await IP.aggregate([
       {
-        $match: generateMatchQueryForAggregation(req.query as any),
+        $match: {
+          ...generateMatchQueryForAggregation(req.query as any),
+          status: IpStatus.Published,
+        },
       },
       {
         $project: {
