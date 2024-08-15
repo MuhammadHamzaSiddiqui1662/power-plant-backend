@@ -6,8 +6,6 @@ import { Chat } from "./chat.entity";
 
 const chatSocket = (io: Server) => {
   io.on("connection", (socket) => {
-    console.log(socket.id);
-
     // Update user online status
     socket.on("userOnline", async (userId) => {
       if (userId) {
@@ -61,7 +59,7 @@ const chatSocket = (io: Server) => {
           chat.unReadMessages++;
           chat.lastMessage = content;
         }
-        io.to(chatId).emit("newMessage", populatedMessage);
+        io.to(chatId).emit("newMessage", senderId, populatedMessage);
         io.to(receiverId).emit("messageNotification", chat);
       }
     });
@@ -106,7 +104,6 @@ const chatSocket = (io: Server) => {
     });
 
     socket.on("disconnect", async () => {
-      console.log("A user disconnected");
       // Update user offline status
       const userId = socket.handshake.query.userId;
       await User.findByIdAndUpdate(userId, {
