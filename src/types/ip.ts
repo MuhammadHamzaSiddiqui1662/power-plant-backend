@@ -3,4 +3,5 @@ export enum IpStatus {
   AppliedForPatent = "Applied For Patent",
   InActive = "In Active",
   Draft = "Draft",
+  Pending = "Pending",
 }
