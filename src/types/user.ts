@@ -5,6 +5,6 @@ export enum UserStatus {
 
 export enum UserType {
   Innovator,
-  Innvestor,
+  Investor,
   Broker,
 }
