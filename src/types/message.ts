@@ -3,4 +3,5 @@ export enum MessageType {
   Voice = "voice",
   CloseChat = "close",
   StartChat = "start",
+  DealClosed = "deal-closed",
 }
