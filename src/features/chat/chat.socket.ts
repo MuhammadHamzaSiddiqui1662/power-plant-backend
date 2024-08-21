@@ -18,6 +18,16 @@ const chatSocket = (io: Server) => {
       }
     });
 
+
+    socket.on("userOffline", async (userId) => {
+      if (userId) {
+        await User.findByIdAndUpdate(userId, {
+          online: false,
+        });
+        socket.broadcast.emit("userStatusChanged", { userId, online: false });
+      }
+    });
+
     // Join a chat room
     socket.on("joinChat", async ({ chatId }) => {
       if (chatId) {
@@ -61,12 +71,32 @@ const chatSocket = (io: Server) => {
           if (chat) {
             chat.unReadMessages++;
             chat.lastMessage = content;
+            chat.save();
           }
           io.to(chatId).emit("newMessage", senderId, populatedMessage);
           io.to(receiverId).emit("messageNotification", chat);
         }
       }
     );
+
+    // Handle messages deletion
+    socket.on(
+      "deleteMessage",
+      async ({ chatId, senderId, type, receiverId, messageId }) => {
+        if (chatId && senderId && type && receiverId && messageId) {
+          const lstMessage = await Message.findOne().sort({ _id: -1 }).limit(1);
+          const chat = await Chat.findById(chatId);
+          if (chat && lstMessage) {
+            chat.unReadMessages--;
+            chat.lastMessage = lstMessage?.content ?? "";
+            chat.save();
+          }
+          io.to(receiverId).emit("messageNotification", chat);
+          io.to(chatId).emit("messageRemoved", senderId, messageId);
+        }
+      }
+    );
+
 
     // Handle deal close
     socket.on("closeDeal", async ({ chatId, review }) => {
