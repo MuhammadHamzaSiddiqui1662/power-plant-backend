@@ -18,7 +18,6 @@ const chatSocket = (io: Server) => {
       }
     });
 
-
     socket.on("userOffline", async (userId) => {
       if (userId) {
         await User.findByIdAndUpdate(userId, {
@@ -97,7 +96,6 @@ const chatSocket = (io: Server) => {
       }
     );
 
-
     // Handle deal close
     socket.on("closeDeal", async ({ chatId, review }) => {
       console.log(chatId, review);
@@ -125,18 +123,33 @@ const chatSocket = (io: Server) => {
 
     // Handle message seen
     socket.on("messageSeen", async ({ messageId, userId }) => {
-      if (userId && messageId) {
-        const message = await Message.findByIdAndUpdate(messageId, {
-          seen: true,
-          seenAt: new Date(),
-        });
-        if (message) {
-          io.to(message.chatId.toString()).emit("messageSeen", {
-            messageId,
-            userId,
-            seenAt: message.seenAt,
+      try {
+        if (userId && messageId) {
+          const message = await Message.findByIdAndUpdate(messageId, {
+            seen: true,
+            seenAt: new Date(),
           });
+          if (message) {
+            const unReadMessages = (
+              await Message.find({ chatId: message.chatId, seen: false })
+            ).length;
+            const chat = await Chat.findByIdAndUpdate(message.chatId, {
+              unReadMessages,
+            });
+            const lastMessage = chat?.lastMessage;
+            io.to(message.chatId.toString()).emit("messagesSeen", {
+              unReadMessages,
+              lastMessage,
+            });
+            io.to(message.chatId.toString()).emit("messageSeen", {
+              messageId,
+              userId,
+              seenAt: message.seenAt,
+            });
+          }
         }
+      } catch (error) {
+        console.log(error);
       }
     });
 
