@@ -25,6 +25,10 @@ const chatSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  reviewed: {
+    type: Boolean,
+    default: false,
+  },
   unReadMessages: {
     type: Number,
     default: 0,

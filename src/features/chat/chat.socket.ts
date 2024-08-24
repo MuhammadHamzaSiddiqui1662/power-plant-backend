@@ -114,7 +114,8 @@ const chatSocket = (io: Server) => {
       ) {
         user[reviewType as ReviewType].push(data);
         await user.save();
-        chat.closed = true;
+        if (chat.closed) chat.reviewed = true;
+        else chat.closed = true;
         await chat.save();
 
         io.to(chatId).emit("dealClosed", true);
