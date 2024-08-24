@@ -13,6 +13,10 @@ const chatSchema = new Schema({
     type: Types.ObjectId,
     ref: "User",
   },
+  ip: {
+    type: Types.ObjectId,
+    ref: "IP",
+  },
   closed: {
     type: Boolean,
     default: false,

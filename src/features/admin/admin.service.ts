@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { CustomRequestHandler } from "../../types/common";
 import { IP } from "../ip/ip.entity";
 import { User } from "../user/user.entity";
-import { Hiring } from "../hiring/hiring.entity";
+import { Chat } from "../chat/chat.entity";
 
 const generateMatchQueryForIpAggregation = (filterQuery: {
   [key: string]: string | string[];
@@ -110,9 +110,11 @@ export const getAllUsers: CustomRequestHandler = async (req, res) => {
 
 export const getUserHirings: CustomRequestHandler = async (req, res) => {
   try {
-    const hirings = await Hiring.find({ investor: req.params.id }).populate(
-      "investor broker ip"
-    );
+    const hirings = await Chat.find({
+      investor: req.params.id,
+      broker: { $ne: null },
+      closed: false,
+    }).populate("investor broker ip");
     res.status(200).json(hirings);
   } catch (error) {
     console.log(error);

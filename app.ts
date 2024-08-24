@@ -17,7 +17,6 @@ import { NotificationRouter } from "./src/features/notification/notification.con
 import { ChatRouter } from "./src/features/chat/chat.controller";
 import { MessageRouter } from "./src/features/message/message.controller";
 import chatSocket from "./src/features/chat/chat.socket";
-import { HiringRouter } from "./src/features/hiring/hiring.controller";
 import { CarRouter } from "./src/features/car/car.controller";
 import { IPRouter } from "./src/features/ip/ip.controller";
 import { StripeRouter } from "./src/features/stripe/stripe.controller";
@@ -60,7 +59,6 @@ app.use("/api/v1/packages", PackageRouter);
 app.use("/api/v1/notifications", authMiddleware, NotificationRouter);
 app.use("/api/v1/chats", authMiddleware, ChatRouter);
 app.use("/api/v1/messages", authMiddleware, MessageRouter);
-app.use("/api/v1/hirings", authMiddleware, HiringRouter);
 app.use("/api/v1/cars", CarRouter);
 app.use("/api/v1/payment/stripe", authMiddleware, StripeRouter);
 app.use("/api/v1/test", TestRouter);
