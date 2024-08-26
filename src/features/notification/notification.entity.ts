@@ -1,27 +1,25 @@
 import { Schema, Types, model } from "mongoose";
 
-const notificationSchema = new Schema({
-    title: {
-        type: String,
-        required: [true, "Title is required"],
+const notificationSchema = new Schema(
+  {
+    message: {
+      type: String,
+      required: [true, "Description is required"],
     },
-    description: {
-        type: String,
-        required: [true, "Description is required"],
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now,
+    imageUrl: {
+      type: String,
+      required: [true, "Image URL is required"],
     },
     link: {
-        type: String,
-        required: [true, "Link is required"],
+      type: String,
     },
     userId: {
-        type: Types.ObjectId,
-        ref: "User",
-        required: [true, "User ID is required"],
+      type: Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is required"],
     },
-});
+  },
+  { timestamps: true }
+);
 
 export const Notification = model("Notification", notificationSchema);

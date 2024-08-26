@@ -13,10 +13,10 @@ export const getAllNotifications: CustomRequestHandler = async (req, res) => {
 
 export const createNotification: CustomRequestHandler = async (req, res) => {
   try {
-    const { title, description, link, userId } = req.body;
+    const { message, imageUrl, link, userId } = req.body;
     const newNotification = new Notification({
-      title,
-      description,
+      message,
+      imageUrl,
       link,
       userId,
     });
@@ -43,14 +43,14 @@ export const getNotificationById: CustomRequestHandler = async (req, res) => {
 export const updateNotification: CustomRequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, link, userId } = req.body;
+    const { message, imageUrl, link, userId } = req.body;
     const notification = await Notification.findById(id);
     if (!notification) {
       return res.status(404).json({ message: "Notification not found" });
     }
 
-    if (title) notification.title = title;
-    if (description) notification.description = description;
+    if (message) notification.message = message;
+    if (imageUrl) notification.imageUrl = imageUrl;
     if (link) notification.link = link;
     if (userId) notification.userId = userId;
 
