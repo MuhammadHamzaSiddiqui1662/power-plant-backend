@@ -57,8 +57,9 @@ const chatSocket = (io: Server) => {
             if (prevCloseMessage)
               await Message.findByIdAndDelete(prevCloseMessage._id);
           }
+          
           const message = new Message(
-            type === MessageType.StartChat || type === MessageType.CloseChat
+            type === MessageType.StartChat || type === MessageType.CloseChat || type === MessageType.ReviewChat
               ? { chatId, sender: senderId, type }
               : { chatId, sender: senderId, type, content }
           );
@@ -96,7 +97,7 @@ const chatSocket = (io: Server) => {
       }
     );
 
-    // Handle deal close
+   // Handle deal close
     socket.on("closeDeal", async ({ chatId, review }) => {
       console.log(chatId, review);
       const { userId, reviewType, data } = review;
