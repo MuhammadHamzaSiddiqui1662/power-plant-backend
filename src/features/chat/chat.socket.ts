@@ -4,6 +4,7 @@ import { User } from "../user/user.entity";
 import { MessageType } from "../../types/message";
 import { Chat } from "./chat.entity";
 import { ReviewType } from "../../types/review";
+import { addRoomToUser, removeRoomFromUser, getRoomsForUser } from "../../utils/dictionary";
 
 const chatSocket = (io: Server) => {
   io.on("connection", (socket) => {
@@ -28,11 +29,18 @@ const chatSocket = (io: Server) => {
     });
 
     // Join a chat room
-    socket.on("joinChat", async ({ chatId }) => {
+    socket.on("joinChat", async ({ chatId, userId }) => {
       if (chatId) {
-        socket.join(chatId);
 
-        // Emit all previous messages in the chat
+        const rooms = getRoomsForUser(userId);
+        console.log(rooms)
+        if (rooms && rooms.includes(chatId)) {
+          console.log(`User ${userId} is already in room ${chatId}`);
+        } else {
+          socket.join(chatId);
+          addRoomToUser(userId, chatId);
+          // Emit all previous messages in the chat
+        }
         const messages = await Message.find({ chatId })
           .sort({ timestamp: 1 })
           .populate("sender");
@@ -57,7 +65,7 @@ const chatSocket = (io: Server) => {
             if (prevCloseMessage)
               await Message.findByIdAndDelete(prevCloseMessage._id);
           }
-          
+
           const message = new Message(
             type === MessageType.StartChat || type === MessageType.CloseChat || type === MessageType.ReviewChat
               ? { chatId, sender: senderId, type }
@@ -97,7 +105,7 @@ const chatSocket = (io: Server) => {
       }
     );
 
-   // Handle deal close
+    // Handle deal close
     socket.on("closeDeal", async ({ chatId, review }) => {
       console.log(chatId, review);
       const { userId, reviewType, data } = review;
@@ -127,27 +135,38 @@ const chatSocket = (io: Server) => {
     socket.on("messageSeen", async ({ messageId, userId }) => {
       try {
         if (userId && messageId) {
+
           const message = await Message.findByIdAndUpdate(messageId, {
             seen: true,
             seenAt: new Date(),
           });
+
           if (message) {
-            const unReadMessages = (
+            let unReadMessages = (
               await Message.find({ chatId: message.chatId, seen: false })
             ).length;
+            console.log(unReadMessages);
+            unReadMessages-=unReadMessages
+            console.log(unReadMessages);
             const chat = await Chat.findByIdAndUpdate(message.chatId, {
               unReadMessages,
             });
+
+
+
             const lastMessage = chat?.lastMessage;
             io.to(message.chatId.toString()).emit("messagesSeen", {
               unReadMessages,
               lastMessage,
             });
+
             io.to(message.chatId.toString()).emit("messageSeen", {
               messageId,
               userId,
               seenAt: message.seenAt,
             });
+
+            io.to(userId).emit("messageNotification", chat);
           }
         }
       } catch (error) {
@@ -163,6 +182,7 @@ const chatSocket = (io: Server) => {
         lastSeen: new Date(),
       });
       socket.broadcast.emit("userStatusChanged", { userId, online: false });
+
     });
   });
 };
